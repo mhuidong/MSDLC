@@ -179,7 +179,7 @@ class ArithmeticDecoder(ArithmeticCoderBase):
         super(ArithmeticDecoder, self).__init__(statesize)
         # The underlying bit input stream.
         self.input = bitin
-        # The current raw code bits being buffered, which is always in the range [low, high].
+        # The current a- code bits being buffered, which is always in the range [low, high].
         self.code = 0
         for _ in range(self.STATE_SIZE):
             self.code = self.code << 1 | self.read_code_bit()

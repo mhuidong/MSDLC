@@ -15,7 +15,7 @@ from dacite import Config as DaciteConfig
 from xlstm import xLSTMLMModel, xLSTMLMModelConfig
 
 class XLSTMModel(nn.Module):
-    def __init__(self, batchsize, layers, hidden_dim, ffn_dim, heads, vocab_dim, timesteps, vocab_size):
+    def __init__(self, layers, vocab_dim, timesteps, vocab_size):
         super(XLSTMModel, self).__init__()
         self.xlstm_cfg = """ 
             vocab_size: {}

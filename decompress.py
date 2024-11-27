@@ -25,17 +25,15 @@ def parseArgs(argv):
     parser.add_argument('--wd', type=float, default=1e-7, help='Weight decay.')
     parser.add_argument('--timesteps', type=int, default=32, help='The number of history symbols')
     parser.add_argument('--vocab_dim', type=int, default=256, help='The dimension of vocab.')
-    parser.add_argument('--hidden_dim', type=int, default=256, help='The dimension of hidden layer.')
-    parser.add_argument('--ffn_dim', type=int, default=4096, help='The dimension of ffn layer.')
-    parser.add_argument('--n_layers', type=int, default=1, help='The number of layers.')
-    parser.add_argument('--n_heads', type=int, default=1, help='The number of heads.')
+    parser.add_argument('--n_layers', type=int, default=3, help='The number of layers.')
     parser.add_argument('--seed', type=int, default=0, help='Random seeds.')
     args = parser.parse_args(argv)
     return args
 
 def decompress(args, temp_file, info, last):
     bs, ts = args.batchsize, args.timesteps
-    len_series, id2char_dict, extened_dict, vocab_size = info['len_series'], info['id2char_dict'], info['extended_dict'], info['vocab_size']
+    len_series, id2char_dict, extened_dict, vocab_size = info['len_series'], info['id2char_dict'], info[
+        'extended_dict'], info['vocab_size']
 
 
     iter_num = (len_series - ts) // bs      # 10439
@@ -57,7 +55,7 @@ def decompress(args, temp_file, info, last):
             series_2d[i, j] = dec[i].read(cumul, vocab_size)
 
     cumul_batch = np.zeros((bs, vocab_size + 1), dtype=np.uint64)
-    model = compress_model.XLSTMModel(batchsize=args.batchsize, layers=args.n_layers, hidden_dim=args.hidden_dim, ffn_dim=args.ffn_dim, heads=args.n_heads, vocab_size=vocab_size, vocab_dim=args.vocab_dim, timesteps=ts).cuda()   #没有用到vocab_dim
+    model = compress_model.XLSTMModel(layers=args.n_layers, vocab_size=vocab_size, vocab_dim=args.vocab_dim, timesteps=ts).cuda()  # 没有用到vocab_dim#没有用到vocab_dim
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.wd)
 
     flag = 0
@@ -89,7 +87,7 @@ def decompress(args, temp_file, info, last):
 
     series_2d = series_2d.reshape(-1)
     fout = open(args.output, 'wb')
-    series_2d = [extened_dict.get(str(x), int(x)) for x in series_2d]  # extended 解压缩
+    series_2d = [extened_dict.get(str(x), int(x)) for x in series_2d]
     series_2d = [item for element in series_2d for item in (element if isinstance(element, tuple) else [element])]
     fout.write(bytearray([id2char_dict[str(s)] for s in series_2d]))
 
@@ -110,11 +108,9 @@ def decompress(args, temp_file, info, last):
             series[j] = dec.read(cumul, vocab_size)
 
         print("Last decode part don't need inference.")
-        # fout.write(decode_tokens(series))
-        # series = [id2char_dict[str(s)] for s in series]
         series = [extened_dict.get(str(x), int(x)) for x in series]   # extended 解压缩
         series = [item for element in series for item in (element if isinstance(element, tuple) else [element])]
-        fout.write(bytearray([id2char_dict[str(s)] for s in series]))
+        fout.write(bytearray(id2char_dict[str(s)] for s in series))
         bitin.close()
         f.close()
     return
@@ -129,13 +125,12 @@ def main(args):
     torch.cuda.manual_seed_all(args.seed)
 
     if not args.tempdir:
-        args.tempdir = "{}_bs{}_ts{}_v{}_h{}_f{}_l{}".format(args.prefix, args.batchsize, args.timesteps, args.vocab_dim, args.hidden_dim, args.ffn_dim, args.n_layers)
-    # args.timesteps = args.timesteps * (args.hidden_dim // args.vocab_dim)
+        args.tempdir = "{}_bs{}_ts{}_v{}_l{}".format(args.prefix, args.batchsize, args.timesteps, args.vocab_dim, args.n_layers)
     if os.path.exists(args.tempdir):
         shutil.rmtree(args.tempdir)
     os.mkdir(args.tempdir)
     temp_file = args.tempdir + '/compressed_temp_file'
-    info_dict = eval(open(args.prefix + '.params').read())
+    info_dict = eval(open(args.input + '.params').read())
 
     f = open(args.input, 'rb')
     for i in range(args.batchsize):
@@ -161,13 +156,6 @@ def main(args):
     # remove temp files
     shutil.rmtree(args.tempdir)
     t2 = time.time()
-    # extend_vb = eval(open(args.prefix + '.evb').read())
-    # with open(args.input, 'rb') as f:  # 一次一个byte = 8bit
-    #     series = np.frombuffer(f.read(), dtype=np.uint8)
-    # f.close()
-    # series = np.array([extend_vb.get(x, x) for x in series])
-    # np.save(args.output, series)
-
     print('Decompression Time: {} secs'.format(round(t2-t1, 5)))
     print('Peak GPU memory usage: {} KBs'.format(torch.cuda.max_memory_allocated()//1024))
 
