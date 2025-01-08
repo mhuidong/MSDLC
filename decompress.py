@@ -10,22 +10,20 @@ import arithmeticcoding_fast
 from utils import *
 
 torch.backends.cudnn.deterministic = True
-torch.backends.cudnn.benchmark = True
-
+torch.backends.cudnn.benchmark = False
 
 def parseArgs(argv):
     parser = argparse.ArgumentParser()
     parser.add_argument('input', type=str, help='Source file.')
     parser.add_argument('output', type=str, help='Compressed file.')
-    parser.add_argument('--gpu', type=str, default='0', help='GPU to use.')
     parser.add_argument('--tempdir', '-T', type=str, help='Temporary folder name.')
-    parser.add_argument('--prefix', '-p', type=str, default='rzip', help='Prefixes of files')
+    parser.add_argument('--prefix', '-p', type=str, help='Prefixes of files')
     parser.add_argument('--batchsize', '-b', type=int, default=512, help='Sample size in one batch')
     parser.add_argument('--lr', type=float, default=0.001, help='Learning rate.')
     parser.add_argument('--wd', type=float, default=1e-7, help='Weight decay.')
     parser.add_argument('--timesteps', type=int, default=32, help='The number of history symbols')
     parser.add_argument('--vocab_dim', type=int, default=256, help='The dimension of vocab.')
-    parser.add_argument('--n_layers', type=int, default=3, help='The number of layers.')
+    parser.add_argument('--layers', type=int, default=2, help='The number of layers.')
     parser.add_argument('--seed', type=int, default=0, help='Random seeds.')
     args = parser.parse_args(argv)
     return args
@@ -55,7 +53,7 @@ def decompress(args, temp_file, info, last):
             series_2d[i, j] = dec[i].read(cumul, vocab_size)
 
     cumul_batch = np.zeros((bs, vocab_size + 1), dtype=np.uint64)
-    model = compress_model.XLSTMModel(layers=args.n_layers, vocab_size=vocab_size, vocab_dim=args.vocab_dim, timesteps=ts).cuda()  # 没有用到vocab_dim#没有用到vocab_dim
+    model = compress_model.XLSTMModel(layers=args.layers, vocab_size=vocab_size, vocab_dim=args.vocab_dim, timesteps=ts).cuda()  # 没有用到vocab_dim#没有用到vocab_dim
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.wd)
 
     flag = 0
@@ -120,17 +118,19 @@ def main(args):
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
     os.environ['PYTHONHASHSEED'] = str(args.seed)
-    os.environ["CUDA_VISIBLE_DEVICES"]=args.gpu
     torch.cuda.manual_seed(args.seed)
     torch.cuda.manual_seed_all(args.seed)
 
+    if not args.prefix:
+        args.prefix = os.path.basename(args.input).split('.')[0]
+
     if not args.tempdir:
-        args.tempdir = "{}_bs{}_ts{}_v{}_l{}".format(args.prefix, args.batchsize, args.timesteps, args.vocab_dim, args.n_layers)
+        args.tempdir = "{}_bs{}_ts{}_v{}_l{}".format(args.prefix, args.batchsize, args.timesteps, args.vocab_dim, args.layers)
     if os.path.exists(args.tempdir):
         shutil.rmtree(args.tempdir)
     os.mkdir(args.tempdir)
     temp_file = args.tempdir + '/compressed_temp_file'
-    info_dict = eval(open(args.input + '.params').read())
+    info_dict = eval(open(args.prefix + '.params').read())
 
     f = open(args.input, 'rb')
     for i in range(args.batchsize):

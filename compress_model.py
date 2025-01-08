@@ -5,15 +5,12 @@ E-mail: mahd@nbjl.nankai.edu.cn
 Date: 2024/8/28
 Description: xLSTM Language Model
 """
-
 import torch
 import torch.nn as nn
-
 from omegaconf import OmegaConf
 from dacite import from_dict
 from dacite import Config as DaciteConfig
 from xlstm import xLSTMLMModel, xLSTMLMModelConfig
-
 class XLSTMModel(nn.Module):
     def __init__(self, layers, vocab_dim, timesteps, vocab_size):
         super(XLSTMModel, self).__init__()
