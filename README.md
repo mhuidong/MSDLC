@@ -4,7 +4,7 @@ MSDLC: multi-source data lossless compression via parallel expansion mapping and
 # Usage
 Take the file **test.txt** as an example:
 compression
-```python
+```
 python compress.py test.txt test.msdlc --prefix test
 ```
 
