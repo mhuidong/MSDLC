@@ -2,15 +2,15 @@
 MSDLC: multi-source data lossless compression via parallel expansion mapping and xLSTM
 
 # Usage
-
+Take the file **test.txt** as an example:
 compression
-```
-python compress.py file file.msdlc
+```python
+python compress.py test.txt test.msdlc --prefix test
 ```
 
 decompression
 ```
-python decompress.py file.msdlc file.msdlc.out
+python decompress.py test.msdlc test.msdlc.out --prefix test
 ```
 
 
