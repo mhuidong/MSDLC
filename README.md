@@ -33,5 +33,5 @@ If you mention this work in your manuscript, please add the following code to yo
 ```
 
 # Contact us
-Email: mahd@nbjl.nankai.edu.cn or sunh@nbjl.nankai.edu.cn
+Email: mahd@nbjl.nankai.edu.cn or sunh@nbjl.nankai.edu.cn  
 Nankai-Baidu Joint Laboratory (NBJL)
