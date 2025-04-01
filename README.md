@@ -1,5 +1,5 @@
-# MSDLC
-A multi-source data lossless compression via parallel expansion mapping and xLSTM
+# [ICASSP '25] MSDLC
+Multi-source Data Lossless Compression via Parallel Expansion Mapping and xLSTM
 
 # Usage
 ```
