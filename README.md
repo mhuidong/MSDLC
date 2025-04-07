@@ -1,5 +1,7 @@
-# [ICASSP '25] MSDLC
-Multi-source Data Lossless Compression via Parallel Expansion Mapping and xLSTM
+<div align="center">
+<h1>MSDLC (ICASSP 2025)</h1>
+<h3>Multi-source Data Lossless Compression via Parallel Expansion Mapping and xLSTM</h2>
+</div>
 
 # Usage
 ```
@@ -33,5 +35,5 @@ If you mention this work in your manuscript, please add the following code to yo
 ```
 
 # Contact us
-Email: mahd@nbjl.nankai.edu.cn or sunh@nbjl.nankai.edu.cn  
+Email: mahd@nbjl.nankai.edu.cn
 Nankai-Baidu Joint Laboratory (NBJL)
