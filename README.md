@@ -37,8 +37,7 @@ If you are interested in our work, we hope you might consider starring our repos
 The code is based on [xLSTM](https://github.com/NX-AI/xlstm) and [Reference-arithmetic-coding](https://github.com/nayuki/Reference-arithmetic-coding). Thanks for these great works.
 
 # Contact us
-Email: mahd@nbjl.nankai.edu.cn
-
+Email: mahd@nbjl.nankai.edu.cn  
 Nankai-Baidu Joint Laboratory (NBJL)
 
 
