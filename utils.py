@@ -49,23 +49,27 @@ def decode_token(token):
 def decode_tokens(tokens):
     return ''.join(list(map(decode_token, tokens)))
 
-def extend_vocab_size(series, win_len=2, strides=2, final_size=256):
-    assert strides <= win_len 
+def extend_vocab_size(series, win_len=4, strides=4, final_size=256):
+    assert strides <= win_len
     vocab_size = len(np.unique(series))
     print('The current length of series: {}'.format(len(series)))
     mers = list()
     for start in range(0, len(series)-win_len+1, strides):
         mer = tuple(series[start:start + win_len])
         mers.append(mer)
+
     n = final_size - vocab_size
     mer_counter = Counter(mers)
     mer_most = mer_counter.most_common(n)
     top_vocabs = [ele[0] for ele in mer_most]
-
     extend_vocabs = list(range(vocab_size, vocab_size + n))
-    extend_dic = {k: v for k, v in zip(top_vocabs, extend_vocabs)} 
+    extend_dic = {k: v for k, v in zip(top_vocabs, extend_vocabs)}
     extend2vocab = {k: v for k, v in zip(extend_vocabs, top_vocabs)}
-    new_series = [extend_dic.get(ele, ele) for ele in mers] 
+    new_series = [extend_dic.get(ele, ele) for ele in mers]
     new_series = [item for sublist in new_series for item in (sublist if isinstance(sublist, tuple) else [sublist])]
+
+    last_start = len(series) - len(series) % win_len
+    if last_start < len(series):
+        new_series = np.concatenate((new_series, series[last_start:]), axis=0)
     print('Extended Length:', len(new_series))
     return np.array(new_series), extend2vocab
